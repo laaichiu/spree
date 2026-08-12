@@ -1259,6 +1259,13 @@
                     ]
                   },
                   {
+                    "group": "Digital Products",
+                    "icon": "file-arrow-down",
+                    "pages": [
+                      "v6/developer/how-to/custom-digital-asset-provider"
+                    ]
+                  },
+                  {
                     "group": "Reports",
                     "icon": "chart-bar",
                     "pages": [
