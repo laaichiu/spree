@@ -32152,6 +32152,8 @@ paths:
                 name: Spree Test Store
                 seo_title:
                 meta_description: Sample store description.
+                address_requires_phone: false
+                address_validates_phone: false
                 metadata: {}
                 code: spree_1
                 default_currency: USD
@@ -32174,7 +32176,6 @@ paths:
                 always_include_confirm_step: false
                 company_field_enabled: false
                 address_requires_company: false
-                address_requires_phone: false
                 capture_method: checkout
                 track_inventory_levels: true
                 stock_reservations_enabled: true
@@ -32524,6 +32525,8 @@ paths:
                 name: Renamed Store
                 seo_title:
                 meta_description: Sample store description.
+                address_requires_phone: false
+                address_validates_phone: false
                 metadata: {}
                 code: spree_1
                 default_currency: USD
@@ -32546,7 +32549,6 @@ paths:
                 always_include_confirm_step: false
                 company_field_enabled: false
                 address_requires_company: false
-                address_requires_phone: false
                 capture_method: checkout
                 track_inventory_levels: true
                 stock_reservations_enabled: true
@@ -74551,6 +74553,10 @@ components:
         meta_description:
           type: string
           nullable: true
+        address_requires_phone:
+          type: boolean
+        address_validates_phone:
+          type: boolean
         metadata:
           type: object
         code:
@@ -75586,8 +75592,6 @@ components:
           type: boolean
         address_requires_company:
           type: boolean
-        address_requires_phone:
-          type: boolean
         capture_method:
           type: string
           enum:
@@ -76315,6 +76319,8 @@ components:
       - name
       - seo_title
       - meta_description
+      - address_requires_phone
+      - address_validates_phone
       - metadata
       - code
       - default_currency
@@ -76337,7 +76343,6 @@ components:
       - always_include_confirm_step
       - company_field_enabled
       - address_requires_company
-      - address_requires_phone
       - capture_method
       - track_inventory_levels
       - stock_reservations_enabled
@@ -86618,6 +86623,9 @@ components:
         address_requires_phone:
           type: boolean
           description: Makes a phone number mandatory on customer addresses.
+        address_validates_phone:
+          type: boolean
+          description: Validates nonblank phone numbers even when they are optional.
         capture_method:
           type: string
           enum:

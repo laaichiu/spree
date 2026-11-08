@@ -27,6 +27,8 @@ RSpec.describe Spree::Api::V3::Store::StoreController, type: :controller do
       expect(json_response['name']).to eq('Coffee Shop')
       expect(json_response['seo_title']).to eq('Coffee Shop — Fresh Beans')
       expect(json_response['meta_description']).to eq('Freshly roasted coffee')
+      expect(json_response['address_requires_phone']).to be(false)
+      expect(json_response['address_validates_phone']).to be(false)
     end
 
     it 'returns the translation for the requested locale' do
@@ -56,7 +58,16 @@ RSpec.describe Spree::Api::V3::Store::StoreController, type: :controller do
     it 'does not expose back-office store settings' do
       get :show
 
-      expect(json_response.keys).to match_array(%w[id name seo_title meta_description])
+      expect(json_response.keys).to match_array(%w[id name seo_title meta_description address_requires_phone address_validates_phone])
+    end
+
+    it 'exposes the store phone requirement used by address forms' do
+      store.update!(preferred_address_requires_phone: true, preferred_address_validates_phone: true)
+
+      get :show
+
+      expect(json_response['address_requires_phone']).to be(true)
+      expect(json_response['address_validates_phone']).to be(true)
     end
   end
 end

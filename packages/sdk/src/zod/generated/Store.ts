@@ -6,6 +6,8 @@ export const StoreSchema = z.object({
   name: z.string(),
   seo_title: z.string().nullable(),
   meta_description: z.string().nullable(),
+  address_requires_phone: z.boolean(),
+  address_validates_phone: z.boolean(),
 });
 
 export type Store = z.infer<typeof StoreSchema>;

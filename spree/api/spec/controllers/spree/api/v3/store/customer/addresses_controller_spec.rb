@@ -95,7 +95,7 @@ RSpec.describe Spree::Api::V3::Store::Customer::AddressesController, type: :cont
         address1: '123 Main St',
         city: 'New York',
         postal_code: Spree::TestingSupport::CountryPool.postal_code_for(country.iso),
-        phone: '555-1234',
+        phone: '+12025550123',
         country_code: country.iso,
         state_code: state.abbr
       }
@@ -116,6 +116,23 @@ RSpec.describe Spree::Api::V3::Store::Customer::AddressesController, type: :cont
       expect(json_response['last_name']).to eq('Doe')
       expect(json_response['address1']).to eq('123 Main St')
       expect(json_response['state_code']).to eq(state.abbr)
+      expect(json_response['phone']).to eq('+12025550123')
+    end
+
+    it 'rejects an invalid nonblank phone even when phone is optional' do
+      store.update!(preferred_address_validates_phone: true)
+      post :create, params: address_params.merge(phone: '1234567890')
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(json_response.dig('error', 'details', 'phone')).to be_present
+    end
+
+    it 'accepts a valid international number from a country other than the address country' do
+      store.update!(preferred_address_validates_phone: true)
+      post :create, params: address_params.merge(country_code: 'UA', state_code: nil, postal_code: '01001', phone: '+12025550123')
+
+      expect(response).to have_http_status(:created)
+      expect(json_response['phone']).to eq('+12025550123')
     end
 
     # state_abbr is the name storefronts shipped against; both halves of the

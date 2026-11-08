@@ -33,7 +33,7 @@ module Spree
 
           # The first two read through `api_type_attributes` above; the money
           # and rate settings are formatted below.
-          preference_attributes Spree::Store, except: %i[order_routing_strategy payout_provider
+          preference_attributes Spree::Store, except: %i[address_requires_phone address_validates_phone order_routing_strategy payout_provider
                                                          default_minimum_payout_amount default_commission_tax_rate]
           typelize weight_unit: [:string, enum: Spree::Variant::WEIGHT_UNITS, enum_type_name: 'WeightUnit']
 

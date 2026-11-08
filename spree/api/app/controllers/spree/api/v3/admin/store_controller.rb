@@ -33,6 +33,7 @@ module Spree
               description: 'Makes a company name mandatory on addresses.'
             body.attribute :address_requires_phone, :boolean,
               description: 'Makes a phone number mandatory on customer addresses.'
+            body.attribute :address_validates_phone, :boolean, description: 'Validates nonblank phone numbers even when they are optional.'
             body.attribute :capture_method, :string,
               choices: Spree::CaptureMethod::CAPTURE_METHODS,
               description: "The store-wide default for when a customer is charged rather than only authorized. A payment method's own setting wins when set."

@@ -10,6 +10,8 @@ module Spree
                  meta_description: [:string, nullable: true]
 
         attributes :name, :seo_title, :meta_description
+
+        preference_attributes Spree::Store, :address_requires_phone, :address_validates_phone
       end
     end
   end
