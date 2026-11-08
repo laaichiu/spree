@@ -128,6 +128,40 @@ RSpec.describe Spree::Addresses::Create do
           expect(subject.call(address_params: address_params.merge(address1: nil), owner: customer)).to be_failure
         }.not_to change { Spree::Address.count }
       end
+
+      it 'does not reuse an existing address with a phone rejected by the current store policy' do
+        store = create(:store)
+
+        Spree::Current.set(store: store) do
+          store.update!(preferred_address_validates_phone: false)
+          invalid_params = address_params.merge(phone: '1234567890')
+          existing = subject.call(address_params: invalid_params, owner: customer).value
+          store.update!(preferred_address_validates_phone: true)
+
+          result = subject.call(address_params: invalid_params, owner: customer)
+
+          expect(result).to be_failure
+          expect(result.value.errors[:phone]).to include('is invalid')
+          expect(customer.reload.addresses).to contain_exactly(existing)
+        end
+      end
+
+      it 'does not reuse an existing address missing a newly required phone' do
+        store = create(:store)
+
+        Spree::Current.set(store: store) do
+          store.update!(preferred_address_requires_phone: false)
+          params_without_phone = address_params.merge(phone: nil)
+          existing = subject.call(address_params: params_without_phone, owner: customer).value
+          store.update!(preferred_address_requires_phone: true)
+
+          result = subject.call(address_params: params_without_phone, owner: customer)
+
+          expect(result).to be_failure
+          expect(result.value.errors[:phone]).to include("can't be blank")
+          expect(customer.reload.addresses).to contain_exactly(existing)
+        end
+      end
     end
   end
 end

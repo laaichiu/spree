@@ -3,6 +3,7 @@ module Spree
     has_prefix_id :addr  # Spree-specific: address
 
     require 'validates_zipcode'
+    require 'phonelib'
 
     include Spree::HasCustomFields
     include Spree::Metadata
@@ -88,6 +89,7 @@ module Spree
     before_validation :normalize_country
     before_validation :normalize_state
     before_validation :clear_invalid_state_entities, if: -> { country.present? }, on: :update
+    before_validation :normalize_phone, if: :phone_normalization_required?
 
     after_create :set_user_attributes, if: -> { customer_owned? }
 
@@ -417,9 +419,24 @@ module Spree
     alias_method :active_merchant_hash, :gateway_hash
 
     def require_phone?
-      # We want to collect phone number for quick checkout but not to validate it
-      # as it's not available before payment by browser.
-      !quick_checkout && store_preference(:address_requires_phone, false)
+      # A quick-checkout address may be incomplete until the payment step.
+      !quick_checkout && store_requires_phone?
+    end
+
+    def store_requires_phone?
+      store_preference(:address_requires_phone, false)
+    end
+
+    def validates_phone?
+      store_requires_phone? || store_preference(:address_validates_phone, false)
+    end
+
+    def phone_valid?
+      parsed_phone = Phonelib.parse(phone, country_code.presence)
+      valid_number = parsed_phone.valid? && parsed_phone.extension.blank?
+      has_country_context = parsed_phone.explicit_international_prefix? || country_code.present?
+
+      valid_number && has_country_context
     end
 
     # A host app that overrode the pre-6.0 +require_zipcode?+ still decides:
@@ -503,6 +520,15 @@ module Spree
       return fallback if store.nil?
 
       store.get_preference(name)
+    end
+
+    def normalize_phone
+      parsed_phone = Phonelib.parse(phone, country_code.presence)
+      self.phone = parsed_phone.e164 if parsed_phone.valid? && parsed_phone.extension.blank? && parsed_phone.e164.present?
+    end
+
+    def phone_normalization_required?
+      validates_phone? && phone.present? && (will_save_change_to_phone? || will_save_change_to_country_code?)
     end
 
     def should_geocode?
