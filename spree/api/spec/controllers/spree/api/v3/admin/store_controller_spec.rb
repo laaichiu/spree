@@ -423,7 +423,9 @@ RSpec.describe Spree::Api::V3::Admin::StoreController, type: :controller do
     end
 
     context 'with address params' do
-      let(:params) { { company_field_enabled: true, address_requires_phone: true } }
+      let(:params) do
+        { company_field_enabled: true, address_requires_phone: true, address_validates_phone: true }
+      end
 
       it 'updates the address settings' do
         subject
@@ -431,6 +433,7 @@ RSpec.describe Spree::Api::V3::Admin::StoreController, type: :controller do
         store.reload
         expect(store.preferred_company_field_enabled).to eq(true)
         expect(store.preferred_address_requires_phone).to eq(true)
+        expect(store.preferred_address_validates_phone).to eq(true)
       end
     end
 

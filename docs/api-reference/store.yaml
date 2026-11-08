@@ -10846,6 +10846,8 @@ paths:
                 name: Spree Test Store
                 seo_title:
                 meta_description: Sample store description.
+                address_requires_phone: false
+                address_validates_phone: false
               schema:
                 "$ref": "#/components/schemas/Store"
         '401':
@@ -23184,11 +23186,17 @@ components:
         meta_description:
           type: string
           nullable: true
+        address_requires_phone:
+          type: boolean
+        address_validates_phone:
+          type: boolean
       required:
       - id
       - name
       - seo_title
       - meta_description
+      - address_requires_phone
+      - address_validates_phone
       x-typelizer: true
     SupplierEvent:
       type: object

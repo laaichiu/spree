@@ -38,6 +38,8 @@ export type StoreUpdateParams = {
   address_requires_company?: boolean
   /** Makes a phone number mandatory on customer addresses. */
   address_requires_phone?: boolean
+  /** Validates nonblank phone numbers even when they are optional. */
+  address_validates_phone?: boolean
   /**
    * The store-wide default for when a customer is charged rather than only authorized. A payment
    * method's own setting wins when set.

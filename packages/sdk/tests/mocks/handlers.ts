@@ -623,6 +623,8 @@ export const handlers = [
       name: 'Coffee Shop',
       seo_title: german ? 'Kaffeeladen' : 'Coffee Shop',
       meta_description: german ? null : 'Freshly roasted coffee',
+      address_requires_phone: false,
+      address_validates_phone: false,
     })
   }),
 

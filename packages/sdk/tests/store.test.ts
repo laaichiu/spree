@@ -11,6 +11,8 @@ describe('store', () => {
     expect(store.name).toBe('Coffee Shop')
     expect(store.seo_title).toBe('Coffee Shop')
     expect(store.meta_description).toBe('Freshly roasted coffee')
+    expect(store.address_requires_phone).toBe(false)
+    expect(store.address_validates_phone).toBe(false)
   })
 
   it('requests the configured locale', async () => {
