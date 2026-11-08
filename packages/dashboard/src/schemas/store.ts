@@ -31,6 +31,7 @@ export const storeSettingsFormSchema = z.object({
   always_include_confirm_step: z.boolean(),
   company_field_enabled: z.boolean(),
   address_requires_phone: z.boolean(),
+  address_validates_phone: z.boolean(),
   capture_method: z.enum(CAPTURE_METHODS),
   pricing_provider: z.string(),
   inventory_provider: z.string(),

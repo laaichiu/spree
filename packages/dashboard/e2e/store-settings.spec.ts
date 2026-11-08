@@ -231,6 +231,31 @@ test.describe('store settings — general', () => {
     await expect(save).toBeDisabled({ timeout: 15_000 })
   })
 
+  test('saves phone validation separately from phone requiredness', async ({ page }) => {
+    const creds = await login(page)
+    await page.goto(STORE_PATH(creds.store_id))
+
+    const required = page.getByRole('switch', { name: /require phone number/i })
+    const validate = page.getByRole('switch', { name: /validate phone numbers/i })
+    const save = page.getByRole('button', { name: /^save$/i })
+    await expect(validate).toBeVisible({ timeout: 15_000 })
+
+    const originalRequired = (await required.getAttribute('aria-checked')) === 'true'
+    const originalValidate = (await validate.getAttribute('aria-checked')) === 'true'
+
+    await validate.click()
+    await save.click()
+    await expect(save).toBeDisabled({ timeout: 15_000 })
+    await page.reload()
+
+    await expect(validate).toHaveAttribute('aria-checked', String(!originalValidate))
+    await expect(required).toHaveAttribute('aria-checked', String(originalRequired))
+
+    await validate.click()
+    await save.click()
+    await expect(save).toBeDisabled({ timeout: 15_000 })
+  })
+
   // The e2e store supports `de` through its Europe market, so the
   // translations editor offers it as a target language.
   test('saves the SEO title and description, and translates them', async ({ page }) => {

@@ -2121,6 +2121,10 @@
           "help": "Hacer obligatorio un número de teléfono en las direcciones de los clientes.",
           "label": "Exigir número de teléfono"
         },
+        "address_validates_phone": {
+          "help": "Comprobar los números indicados según el plan internacional de numeración y guardar los válidos en formato internacional. Esto no hace que el campo sea obligatorio.",
+          "label": "Validar números de teléfono"
+        },
         "always_include_confirm_step": {
           "help": "Siempre dar a los compradores un paso final de revisión antes de realizar el pedido, incluso cuando ningún método de pago lo requiere.",
           "label": "Mostrar siempre el paso de confirmación"
