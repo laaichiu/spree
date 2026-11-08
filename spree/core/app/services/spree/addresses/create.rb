@@ -73,14 +73,13 @@ module Spree
       # The entry the book already holds for this, so a book that has it gets
       # that entry back rather than a second copy of it.
       #
-      # Validation runs first only to resolve the country and state codes, and
-      # its verdict is deliberately ignored: a resubmission carrying the label
-      # it was filed under is invalid precisely because that entry already
-      # exists, and answering it with "name has already been taken" instead of
-      # the entry itself would be absurd. A genuinely invalid address matches
-      # nothing and fails on the save that follows.
+      # Preserve the existing entry response when validation only rejects a
+      # duplicate label. Phone-policy errors must block reuse because a policy
+      # change can make a saved phone invalid without changing the address.
       def existing_entry(address)
         address.validate
+        return if address.errors.any? { |error| error.attribute == :phone }
+
         address.duplicate_in_address_book
       end
 

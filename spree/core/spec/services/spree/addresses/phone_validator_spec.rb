@@ -10,44 +10,68 @@ describe Spree::Addresses::PhoneValidator do
     end
   end
 
-  before do
-    @default_store.update!(preferred_address_requires_phone: true)
-  end
-
-  after do
-    @default_store.update!(preferred_address_requires_phone: false)
-  end
+  before { stub_store_preferences(address_requires_phone: true, address_validates_phone: false) }
 
   describe '#validate' do
     context 'when no phone is provided' do
       let(:address) { create(:address, phone: nil) }
 
       before do
-        @default_store.update!(preferred_address_requires_phone: false)
+        stub_store_preferences(address_requires_phone: false, address_validates_phone: true)
       end
 
       it_behaves_like 'does not add a phone error'
     end
 
-    context 'when no country is provided' do
+    context 'when a national number has no country context' do
       let(:address) { build_stubbed(:address, phone: '2025550123', country: nil) }
 
-      before do
-        @default_store.update!(preferred_address_requires_phone: false)
+      it 'adds an error' do
+        subject.validate(address)
+        expect(address.errors[:phone]).to include('is invalid')
       end
+    end
+
+    context 'when an explicit international number has no address country' do
+      let(:address) { build_stubbed(:address, phone: '+48587530227', country: nil) }
 
       it_behaves_like 'does not add a phone error'
     end
 
-    context 'when no country iso is provided' do
-      let(:address) { build_stubbed(:address, phone: '2025550123') }
+    context 'when an optional phone is invalid' do
+      let(:address) { build_stubbed(:address, phone: '1234567890') }
 
       before do
-        @default_store.update!(preferred_address_requires_phone: false)
-        address.country.iso = nil
+        stub_store_preferences(address_requires_phone: false, address_validates_phone: true)
       end
 
-      it_behaves_like 'does not add a phone error'
+      it 'adds an error' do
+        subject.validate(address)
+        expect(address.errors[:phone]).to include('is invalid')
+      end
+    end
+
+    context 'when phone is required but a quick-checkout address contains an invalid number' do
+      let(:address) { build_stubbed(:address, phone: '1234567890', quick_checkout: true) }
+
+      before do
+        allow(address).to receive(:store_preference).with(:address_requires_phone, false).and_return(true)
+        allow(address).to receive(:store_preference).with(:address_validates_phone, false).and_return(false)
+      end
+
+      it 'validates the supplied number while deferring presence' do
+        subject.validate(address)
+        expect(address.errors[:phone]).to include('is invalid')
+      end
+    end
+
+    context 'when an international number contains an extension' do
+      let(:address) { build_stubbed(:address, phone: '+1 202-555-0123;ext=44') }
+
+      it 'adds an error rather than silently dropping the extension' do
+        subject.validate(address)
+        expect(address.errors[:phone]).to include('is invalid')
+      end
     end
 
     context 'when phone is provided' do
@@ -119,13 +143,10 @@ describe Spree::Addresses::PhoneValidator do
         context 'and phone is invalid' do
           let(:address) { build_stubbed(:address, phone: phone) }
 
-          context 'and phone is from another country' do
+          context 'and phone is an explicit international number from another country' do
             let(:phone) { '+48587530227' } # Poland
 
-            it 'adds an error' do
-              subject.validate(address)
-              expect(address.errors[:phone]).to include('is invalid')
-            end
+            it_behaves_like 'does not add a phone error'
           end
 
           context 'because not matching US area code' do
@@ -139,15 +160,12 @@ describe Spree::Addresses::PhoneValidator do
         end
       end
 
-      context 'because country is not matching phone' do
+      context 'when the international phone country differs from the address country' do
         let(:phone) { '+1(202) 555-0123' } # US
         let(:country) { create(:country, iso: 'PL') }
         let(:address) { build_stubbed(:address, phone: phone, country: country) }
 
-        it 'adds an error' do
-          subject.validate(address)
-          expect(address.errors[:phone]).to include('is invalid')
-        end
+        it_behaves_like 'does not add a phone error'
       end
     end
   end

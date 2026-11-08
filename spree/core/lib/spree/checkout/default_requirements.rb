@@ -25,7 +25,7 @@ module Spree
       # @return [Array<Hash{Symbol => String}>] unmet requirements as
       #   +{ step:, field:, code:, message: }+ hashes
       def call(completion: false)
-        requirements = advisory_requirements
+        requirements = advisory_requirements(completion: completion)
         return requirements unless completion
 
         requirements + completion_requirements
@@ -33,11 +33,12 @@ module Spree
 
       private
 
-      def advisory_requirements
+      def advisory_requirements(completion:)
         [].tap do |r|
           r << req('cart', 'line_items', I18n.t('spree.checkout_requirements.line_items_required')) unless @cart.line_items.any?
           r << req('address', 'email', I18n.t('spree.checkout_requirements.email_required')) unless @cart.email.present?
           r << req('address', 'ship_address', I18n.t('spree.checkout_requirements.ship_address_required')) if @cart.shipping_address_required? && @cart.ship_address.blank?
+          r.concat(phone_policy_errors(completion: completion))
           r << req('delivery', 'delivery_method', I18n.t('spree.checkout_requirements.delivery_method_required')) if delivery_step_required? && !delivery_method_selected?
           r.concat(undeliverable_errors)
           r << req('payment', 'payment', I18n.t('spree.checkout_requirements.payment_required')) if payment_required? && !payment_satisfied?
@@ -50,6 +51,31 @@ module Spree
         errors = stock_errors + quantity_rule_errors + assortment_errors
         errors << req('address', 'email', I18n.t('spree.guest_checkout_not_allowed'), code: 'guest_checkout_not_allowed') if @cart.guest_checkout_disallowed?
         errors
+      end
+
+      def phone_policy_errors(completion:)
+        addresses = [@cart.ship_address, @cart.bill_address].compact.uniq
+
+        addresses.filter_map do |address|
+          required = completion ? address.store_requires_phone? : address.require_phone?
+
+          if required && address.phone.blank?
+            phone_requirement(address, :blank, 'phone_required')
+          elsif address.phone.present? && address.validates_phone? && !address.phone_valid?
+            phone_requirement(address, :invalid, 'phone_invalid')
+          end
+        end
+      end
+
+      def phone_requirement(address, error_type, code)
+        message = address.errors.generate_message(:phone, error_type)
+
+        req(
+          'address',
+          'phone',
+          address.errors.full_message(:phone, message),
+          code: code
+        )
       end
 
       # Re-checked at completion because an agreement can change between the

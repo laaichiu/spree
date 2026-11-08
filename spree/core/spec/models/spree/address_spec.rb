@@ -187,14 +187,56 @@ describe Spree::Address, type: :model do
     end
 
     context 'when phone is required' do
-      before { @default_store.update!(preferred_address_requires_phone: true) }
-
-      after { @default_store.update!(preferred_address_requires_phone: false) }
+      before { stub_store_preferences(address_requires_phone: true) }
 
       it 'validates presence of the phone' do
         address.phone = ''
         address.valid?
         expect(address.errors['phone']).to eq(["can't be blank"])
+      end
+    end
+
+    context 'when a phone is valid' do
+      before { stub_store_preferences(address_validates_phone: true) }
+
+      it 'normalizes a national number to E.164 using the address country' do
+        address.state_code = 'NY'
+        address.phone = '(202) 555-0123'
+
+        expect(address).to be_valid
+        expect(address.phone).to eq('+12025550123')
+      end
+
+      it 'keeps an explicit international number independent of the address country' do
+        address.country_code = 'UA'
+        address.phone = '+1 202-555-0123'
+
+        expect(address).to be_valid
+        expect(address.phone).to eq('+12025550123')
+      end
+
+      it 'normalizes an unchanged national number when its country context changes' do
+        address.save!(validate: false)
+        address.update_column(:phone, '587530227')
+        address.reload
+        address.country_code = 'PL'
+        address.postal_code = Spree::TestingSupport::CountryPool.postal_code_for('PL')
+        address.state_code = nil
+        address.state_name = nil
+
+        expect(address).to be_valid
+        expect(address.phone).to eq('+48587530227')
+      end
+    end
+
+    context 'when a phone is optional' do
+      before { stub_store_preferences(address_requires_phone: false, address_validates_phone: true) }
+
+      it 'rejects a nonblank invalid number' do
+        address.phone = '1234567890'
+
+        expect(address).not_to be_valid
+        expect(address.errors[:phone]).to include('is invalid')
       end
     end
 

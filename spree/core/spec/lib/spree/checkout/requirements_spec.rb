@@ -64,6 +64,132 @@ RSpec.describe Spree::Checkout::Requirements do
     end
   end
 
+  describe 'phone policy requirement' do
+    let(:phone) { '1234567890' }
+    let(:address) do
+      Spree::Current.set(store: store) { create(:address, phone: phone) }
+    end
+    let(:ship_address) { address }
+    let(:bill_address) { address }
+    let(:order) do
+      create(:order, store: store).tap do |record|
+        record.update_column(:ship_address_id, ship_address.id)
+        record.update_column(:bill_address_id, bill_address.id)
+      end
+    end
+    let(:requirements) do
+      Spree::Current.set(store: store) { described_class.new(order.reload).call }
+    end
+    let(:completion_requirements) do
+      Spree::Current.set(store: store) { described_class.new(order.reload).call(completion: true) }
+    end
+
+    context 'when a nonblank phone is invalid under the current policy' do
+      before do
+        Spree::Current.set(store: store) do
+          store.update!(preferred_address_validates_phone: false)
+          address
+          order
+          store.update!(preferred_address_validates_phone: true)
+        end
+      end
+
+      it 'reports the invalid phone as a checkout requirement' do
+        expect(requirements).to include(
+          a_hash_including(step: 'address', field: 'phone', code: 'phone_invalid', message: 'Phone is invalid')
+        )
+      end
+    end
+
+    context 'when the current policy requires a missing phone' do
+      let(:phone) { nil }
+
+      before do
+        Spree::Current.set(store: store) do
+          store.update!(preferred_address_requires_phone: false)
+          address
+          order
+          store.update!(preferred_address_requires_phone: true)
+        end
+      end
+
+      it 'reports the missing phone as a checkout requirement' do
+        expect(requirements).to include(
+          a_hash_including(step: 'address', field: 'phone', code: 'phone_required', message: "Phone can't be blank")
+        )
+      end
+    end
+
+    context 'when an explicit international phone is valid for a different country' do
+      let(:phone) { '+48 58 753 02 27' }
+
+      before do
+        Spree::Current.set(store: store) do
+          store.update!(preferred_address_validates_phone: false)
+          address
+          order
+          store.update!(preferred_address_validates_phone: true)
+        end
+      end
+
+      it 'does not add a phone requirement' do
+        expect(requirements).not_to include(a_hash_including(field: 'phone'))
+      end
+    end
+
+    context 'when a quick-checkout address defers phone requiredness' do
+      let(:phone) { nil }
+      let(:address) do
+        Spree::Current.set(store: store) do
+          create(:address, phone: phone, quick_checkout: true)
+        end
+      end
+
+      before do
+        Spree::Current.set(store: store) do
+          store.update!(preferred_address_requires_phone: false)
+          address
+          order
+          store.update!(preferred_address_requires_phone: true)
+        end
+      end
+
+      it 'defers the missing phone requirement on ordinary cart reads' do
+        expect(requirements).not_to include(a_hash_including(field: 'phone'))
+      end
+
+      it 'enforces the store phone requirement at final completion' do
+        expect(completion_requirements).to include(
+          a_hash_including(step: 'address', field: 'phone', code: 'phone_required')
+        )
+      end
+    end
+
+    context 'when only a different billing address has an invalid phone' do
+      let(:ship_address) { valid_address }
+      let(:bill_address) { address }
+      let(:valid_address) do
+        Spree::Current.set(store: store) { create(:address, phone: '2025550123') }
+      end
+
+      before do
+        Spree::Current.set(store: store) do
+          store.update!(preferred_address_validates_phone: false)
+          address
+          valid_address
+          order
+          store.update!(preferred_address_validates_phone: true)
+        end
+      end
+
+      it 'reports the billing phone as a checkout requirement' do
+        expect(requirements).to include(
+          a_hash_including(step: 'address', field: 'phone', code: 'phone_invalid')
+        )
+      end
+    end
+  end
+
   describe 'shipping_method requirement' do
     let(:order) { create(:order_with_line_items, store: store) }
 

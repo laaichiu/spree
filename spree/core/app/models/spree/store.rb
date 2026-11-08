@@ -179,6 +179,7 @@ module Spree
     # B2B store collects it from everyone, a mixed store only offers it.
     preference :address_requires_company, :boolean, default: false
     preference :address_requires_phone, :boolean, default: false
+    preference :address_validates_phone, :boolean, default: false
     MEDIA_TYPE_FORMAT = %r{\A[a-z0-9][a-z0-9!#$&^_.+-]*/[a-z0-9][a-z0-9!#$&^_.+*-]*\z}i
 
     # digital assets preferences
@@ -204,7 +205,7 @@ module Spree
     # The settings the API reads and writes under their plain names.
     exposes_preferences :admin_locale, :timezone, :storefront_url, :weight_unit, :unit_system, :storefront_access, :guest_checkout,
                         :always_include_confirm_step, :company_field_enabled, :address_requires_company,
-                        :address_requires_phone, :capture_method, :track_inventory_levels, :stock_reservations_enabled,
+                        :address_requires_phone, :address_validates_phone, :capture_method, :track_inventory_levels, :stock_reservations_enabled,
                         :low_stock_threshold, :tax_using_ship_address, :track_price_history,
                         :show_products_without_price, :disable_sku_validation, :order_routing_strategy,
                         :pricing_provider, :inventory_provider, :pricing_provider_failure_policy,

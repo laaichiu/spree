@@ -116,6 +116,44 @@ module Spree
         expect(result.error.value[:errors]).to be_present
       end
 
+      it 'rechecks an existing invalid phone against the current store policy before payment' do
+        ready_cart.ship_address.update_column(:phone, '1234567890')
+        ready_cart.bill_address.update_column(:phone, '2025550123')
+        allow(store).to receive(:get_preference).and_call_original
+        allow(store).to receive(:get_preference).with(:address_requires_phone).and_return(false)
+        allow(store).to receive(:get_preference).with(:address_validates_phone).and_return(true)
+
+        result = Spree::Current.set(store: store) do
+          described_class.call(cart: ready_cart.reload)
+        end
+
+        expect(result).to be_failure
+        expect(result.error.value[:code]).to eq('validation_failed')
+        expect(result.error.value[:errors]).to include(
+          a_hash_including(field: 'phone', code: 'phone_invalid', message: 'Phone is invalid')
+        )
+        expect(Spree::Order.where(cart_id: ready_cart.id)).to be_empty
+      end
+
+      it 'enforces a required phone on a quick-checkout address before payment' do
+        ready_cart.ship_address.update_columns(phone: nil, quick_checkout: true)
+        ready_cart.bill_address.update_column(:phone, '2025550123')
+        allow(store).to receive(:get_preference).and_call_original
+        allow(store).to receive(:get_preference).with(:address_requires_phone).and_return(true)
+        allow(store).to receive(:get_preference).with(:address_validates_phone).and_return(false)
+
+        result = Spree::Current.set(store: store) do
+          described_class.call(cart: ready_cart.reload)
+        end
+
+        expect(result).to be_failure
+        expect(result.error.value[:code]).to eq('validation_failed')
+        expect(result.error.value[:errors]).to include(
+          a_hash_including(field: 'phone', code: 'phone_required')
+        )
+        expect(Spree::Order.where(cart_id: ready_cart.id)).to be_empty
+      end
+
       it 'rejects a variant discontinued after it entered the cart' do
         ready_cart.line_items.first.variant.update_columns(discontinue_on: 1.minute.ago)
 
