@@ -2142,6 +2142,10 @@
           "help": "Uczyń numer telefonu obowiązkowym w adresach klientów.",
           "label": "Wymagaj numeru telefonu"
         },
+        "address_validates_phone": {
+          "help": "Sprawdzaj podane numery według międzynarodowego planu numeracji i zapisuj poprawne w formacie międzynarodowym. To ustawienie nie wymaga podania numeru.",
+          "label": "Sprawdzaj numery telefonu"
+        },
         "always_include_confirm_step": {
           "help": "Zawsze pokazuj klientom końcowy krok weryfikacji przed złożeniem zamówienia, nawet jeśli żadna metoda płatności tego nie wymaga.",
           "label": "Zawsze pokazuj krok potwierdzenia"

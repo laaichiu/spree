@@ -2124,6 +2124,10 @@
           "help": "Rendre le numéro de téléphone obligatoire dans les adresses des clients.",
           "label": "Numéro de téléphone obligatoire"
         },
+        "address_validates_phone": {
+          "help": "Vérifier les numéros renseignés selon le plan de numérotation international et enregistrer les numéros valides au format international. Cela ne rend pas le champ obligatoire.",
+          "label": "Valider les numéros de téléphone"
+        },
         "always_include_confirm_step": {
           "help": "Proposer toujours aux clients une étape de vérification finale avant de valider la commande, même lorsqu’aucun moyen de paiement ne l’exige.",
           "label": "Toujours afficher l’étape de confirmation"

@@ -2124,6 +2124,10 @@
           "help": "Bắt buộc phải ghi số điện thoại trên địa chỉ của khách hàng.",
           "label": "Yêu cầu số điện thoại"
         },
+        "address_validates_phone": {
+          "help": "Kiểm tra số đã nhập theo kế hoạch đánh số quốc tế và lưu số hợp lệ ở định dạng quốc tế. Thiết lập này không bắt buộc nhập số điện thoại.",
+          "label": "Xác thực số điện thoại"
+        },
         "always_include_confirm_step": {
           "help": "Luôn cung cấp cho người mua hàng bước xem xét cuối cùng trước khi đặt hàng, ngay cả khi không có phương thức thanh toán nào yêu cầu.",
           "label": "Luôn hiển thị bước xác nhận"

@@ -2124,6 +2124,10 @@
           "help": "Eine Telefonnummer in Kundenadressen zur Pflicht machen.",
           "label": "Telefonnummer erforderlich"
         },
+        "address_validates_phone": {
+          "help": "Prüft angegebene Nummern anhand des internationalen Nummerierungsplans und speichert gültige Nummern im internationalen Format. Das Feld wird dadurch nicht verpflichtend.",
+          "label": "Telefonnummern prüfen"
+        },
         "always_include_confirm_step": {
           "help": "Kunden vor dem Absenden der Bestellung immer einen abschließenden Prüfschritt anzeigen, auch wenn keine Zahlungsart einen erfordert.",
           "label": "Bestätigungsschritt immer anzeigen"

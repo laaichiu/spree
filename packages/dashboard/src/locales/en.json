@@ -2124,6 +2124,10 @@
           "help": "Make a phone number mandatory on customer addresses.",
           "label": "Require phone number"
         },
+        "address_validates_phone": {
+          "help": "Check nonblank numbers against the numbering plan and save valid values in international format. This does not make the field required.",
+          "label": "Validate phone numbers"
+        },
         "always_include_confirm_step": {
           "help": "Always give shoppers a final review step before placing the order, even when no payment method requires one.",
           "label": "Always show confirmation step"

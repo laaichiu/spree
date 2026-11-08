@@ -122,6 +122,7 @@ function storeToFormValues(store: Store): StoreSettingsFormValues {
     always_include_confirm_step: store.always_include_confirm_step ?? false,
     company_field_enabled: store.company_field_enabled ?? false,
     address_requires_phone: store.address_requires_phone ?? false,
+    address_validates_phone: store.address_validates_phone ?? false,
     capture_method: (store.capture_method as (typeof CAPTURE_METHODS)[number]) ?? 'checkout',
     pricing_provider: store.pricing_provider || INTERNAL_PROVIDER_KEY,
     inventory_provider: store.inventory_provider || INTERNAL_PROVIDER_KEY,
@@ -257,6 +258,7 @@ function StoreSettingsForm({ store }: { store: Store }) {
           always_include_confirm_step: values.always_include_confirm_step,
           company_field_enabled: values.company_field_enabled,
           address_requires_phone: values.address_requires_phone,
+          address_validates_phone: values.address_validates_phone,
           capture_method: values.capture_method,
           pricing_provider: values.pricing_provider,
           inventory_provider: values.inventory_provider,
@@ -603,6 +605,13 @@ function StoreSettingsForm({ store }: { store: Store }) {
                       label={t('admin.fields.store.address_requires_phone.label')}
                       help={t('admin.fields.store.address_requires_phone.help')}
                       name="address_requires_phone"
+                      control={form.control}
+                    />
+                    <SwitchField
+                      id="store-address-validates-phone"
+                      label={t('admin.fields.store.address_validates_phone.label')}
+                      help={t('admin.fields.store.address_validates_phone.help')}
+                      name="address_validates_phone"
                       control={form.control}
                     />
                   </FieldGroup>
