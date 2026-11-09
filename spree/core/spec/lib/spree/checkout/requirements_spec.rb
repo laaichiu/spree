@@ -101,6 +101,27 @@ RSpec.describe Spree::Checkout::Requirements do
       end
     end
 
+    context 'when the built-in phone validator is removed' do
+      around do |example|
+        original_validators = Spree.validators.addresses.dup
+        example.run
+      ensure
+        Spree.validators.addresses.replace(original_validators)
+      end
+
+      it 'does not reintroduce the removed rule at checkout' do
+        Spree::Current.set(store: store) do
+          store.update!(preferred_address_validates_phone: false)
+          address
+          order
+          store.update!(preferred_address_validates_phone: true)
+        end
+        Spree.validators.addresses.unregister(Spree::Addresses::PhoneValidator)
+
+        expect(requirements).not_to include(a_hash_including(field: 'phone'))
+      end
+    end
+
     context 'when the current policy requires a missing phone' do
       let(:phone) { nil }
 

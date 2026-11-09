@@ -61,14 +61,16 @@ module Spree
 
           if required && address.phone.blank?
             phone_requirement(address, :blank, 'phone_required')
-          elsif address.phone.present? && address.validates_phone? && !address.phone_valid?
-            phone_requirement(address, :invalid, 'phone_invalid')
+          elsif address.phone.present? && address.validates_phone?
+            address.valid?
+            phone_error = address.errors.where(:phone).first
+            phone_requirement(address, :invalid, 'phone_invalid', message: phone_error.message) if phone_error
           end
         end
       end
 
-      def phone_requirement(address, error_type, code)
-        message = address.errors.generate_message(:phone, error_type)
+      def phone_requirement(address, error_type, code, message: nil)
+        message ||= address.errors.generate_message(:phone, error_type)
 
         req(
           'address',
