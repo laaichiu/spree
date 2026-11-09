@@ -107,6 +107,9 @@ The Store API includes both phone preferences in `GET /api/v3/store/store`, so
 storefronts can render requiredness and validation consistently with checkout.
 When a store changes its policy, checkout requirements recheck saved addresses
 and block completion until their phone numbers satisfy the current policy.
+Phone requirements retain `field: "phone"` and identify the affected address
+with `address_type: "shipping"` or `"billing"`. A shared shipping and billing
+address produces one requirement.
 
 ### The address validator registry
 
