@@ -54,22 +54,25 @@ module Spree
       end
 
       def phone_policy_errors(completion:)
-        addresses = [@cart.ship_address, @cart.bill_address].compact.uniq
+        Spree::Current.set(store: @cart.store) do
+          addresses = { 'shipping' => @cart.ship_address, 'billing' => @cart.bill_address }.compact.uniq { |_, address| address }
 
-        addresses.filter_map do |address|
-          required = completion ? address.store_requires_phone? : address.require_phone?
+          addresses.filter_map do |address_type, address|
+            required = completion ? address.store_requires_phone? : address.require_phone?
 
-          if required && address.phone.blank?
-            phone_requirement(address, :blank, 'phone_required')
-          elsif address.phone.present? && address.validates_phone?
-            address.valid?
-            phone_error = address.errors.where(:phone).first
-            phone_requirement(address, :invalid, 'phone_invalid', message: phone_error.message) if phone_error
+            if required && address.phone.blank?
+              phone_requirement(address, address_type, :blank, 'phone_required')
+            elsif address.phone.present? && address.validates_phone?
+              address.errors.delete(:phone)
+              address.address_validators
+              phone_error = address.errors.where(:phone).first
+              phone_requirement(address, address_type, :invalid, 'phone_invalid', message: phone_error.message) if phone_error
+            end
           end
         end
       end
 
-      def phone_requirement(address, error_type, code, message: nil)
+      def phone_requirement(address, address_type, error_type, code, message: nil)
         message ||= address.errors.generate_message(:phone, error_type)
 
         req(
@@ -77,7 +80,7 @@ module Spree
           'phone',
           address.errors.full_message(:phone, message),
           code: code
-        )
+        ).merge(address_type: address_type)
       end
 
       # Re-checked at completion because an agreement can change between the

@@ -99,6 +99,28 @@ RSpec.describe Spree::Checkout::Requirements do
           a_hash_including(step: 'address', field: 'phone', code: 'phone_invalid', message: 'Phone is invalid')
         )
       end
+
+      it 'uses the cart store when no request store is set' do
+        result = Spree::Current.set(store: nil) { described_class.new(order.reload).call(completion: true) }
+
+        expect(result).to include(a_hash_including(field: 'phone', code: 'phone_invalid'))
+      end
+
+      it 'does not use another store from the request context' do
+        other_store = create(:store)
+        result = Spree::Current.set(store: other_store) { described_class.new(order.reload).call }
+
+        expect(result).to include(a_hash_including(field: 'phone', code: 'phone_invalid'))
+      end
+
+      it 'does not normalize unrelated address fields while reading requirements' do
+        cart = order.reload
+        checkout_address = cart.ship_address
+        checkout_address.update_columns(country_code: 'GB', state_code: 'CA')
+
+        expect { Spree::Current.set(store: store) { described_class.new(cart).call } }.not_to change(checkout_address, :state_code)
+        expect { Spree::Current.set(store: store) { checkout_address.valid? } }.to change(checkout_address, :state_code).from('CA').to(nil)
+      end
     end
 
     context 'when the built-in phone validator is removed' do
@@ -119,6 +141,33 @@ RSpec.describe Spree::Checkout::Requirements do
         Spree.validators.addresses.unregister(Spree::Addresses::PhoneValidator)
 
         expect(requirements).not_to include(a_hash_including(field: 'phone'))
+      end
+    end
+
+    context 'when a custom phone validator is registered' do
+      let(:phone) { '2025550123' }
+
+      around do |example|
+        original_validators = Spree.validators.addresses.dup
+        example.run
+      ensure
+        Spree.validators.addresses.replace(original_validators)
+      end
+
+      it 'uses the registered rule for a saved address' do
+        Spree::Current.set(store: store) do
+          address
+          order
+          store.update!(preferred_address_validates_phone: true)
+        end
+        stub_const('SpecCheckoutPhoneValidator', Class.new(ActiveModel::Validator) do
+          def validate(record)
+            record.errors.add(:phone, :invalid)
+          end
+        end)
+        Spree.validators.addresses.register(SpecCheckoutPhoneValidator)
+
+        expect(requirements).to include(a_hash_including(field: 'phone', code: 'phone_invalid'))
       end
     end
 
@@ -205,7 +254,32 @@ RSpec.describe Spree::Checkout::Requirements do
 
       it 'reports the billing phone as a checkout requirement' do
         expect(requirements).to include(
-          a_hash_including(step: 'address', field: 'phone', code: 'phone_invalid')
+          a_hash_including(step: 'address', field: 'phone', code: 'phone_invalid', address_type: 'billing')
+        )
+      end
+    end
+
+    context 'when both addresses have invalid phones' do
+      let(:bill_address) do
+        Spree::Current.set(store: store) { create(:address, phone: '1234567890') }
+      end
+
+      before do
+        Spree::Current.set(store: store) do
+          store.update!(preferred_address_validates_phone: false)
+          address
+          bill_address
+          order
+          store.update!(preferred_address_validates_phone: true)
+        end
+      end
+
+      it 'identifies each address in the requirements' do
+        phone_requirements = requirements.select { |requirement| requirement[:field] == 'phone' }
+
+        expect(phone_requirements).to contain_exactly(
+          a_hash_including(code: 'phone_invalid', address_type: 'shipping'),
+          a_hash_including(code: 'phone_invalid', address_type: 'billing')
         )
       end
     end

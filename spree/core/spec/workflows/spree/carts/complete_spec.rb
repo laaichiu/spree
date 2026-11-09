@@ -116,42 +116,58 @@ module Spree
         expect(result.error.value[:errors]).to be_present
       end
 
-      it 'rechecks an existing invalid phone against the current store policy before payment' do
-        ready_cart.ship_address.update_column(:phone, '1234567890')
-        ready_cart.bill_address.update_column(:phone, '2025550123')
-        allow(store).to receive(:get_preference).and_call_original
-        allow(store).to receive(:get_preference).with(:address_requires_phone).and_return(false)
-        allow(store).to receive(:get_preference).with(:address_validates_phone).and_return(true)
+      context 'with a store phone policy' do
+        let(:store) { create(:store) }
 
-        result = Spree::Current.set(store: store) do
-          described_class.call(cart: ready_cart.reload)
+        it 'rechecks an existing invalid phone against the current store policy before payment' do
+          ready_cart.ship_address.update_column(:phone, '1234567890')
+          ready_cart.bill_address.update_column(:phone, '2025550123')
+          store.update!(preferred_address_validates_phone: true)
+
+          result = Spree::Current.set(store: store) do
+            described_class.call(cart: ready_cart.reload)
+          end
+
+          expect(result).to be_failure
+          expect(result.error.value[:code]).to eq('validation_failed')
+          expect(result.error.value[:errors]).to include(
+            a_hash_including(field: 'phone', code: 'phone_invalid', message: 'Phone is invalid')
+          )
+          expect(Spree::Order.where(cart_id: ready_cart.id)).to be_empty
         end
 
-        expect(result).to be_failure
-        expect(result.error.value[:code]).to eq('validation_failed')
-        expect(result.error.value[:errors]).to include(
-          a_hash_including(field: 'phone', code: 'phone_invalid', message: 'Phone is invalid')
-        )
-        expect(Spree::Order.where(cart_id: ready_cart.id)).to be_empty
-      end
+        it 'rejects an invalid phone without an ambient store before payment' do
+          ready_cart.ship_address.update_column(:phone, '1234567890')
+          store.update!(preferred_address_validates_phone: true)
 
-      it 'enforces a required phone on a quick-checkout address before payment' do
-        ready_cart.ship_address.update_columns(phone: nil, quick_checkout: true)
-        ready_cart.bill_address.update_column(:phone, '2025550123')
-        allow(store).to receive(:get_preference).and_call_original
-        allow(store).to receive(:get_preference).with(:address_requires_phone).and_return(true)
-        allow(store).to receive(:get_preference).with(:address_validates_phone).and_return(false)
+          result = Spree::Current.set(store: nil) do
+            described_class.call(cart: ready_cart.reload)
+          end
 
-        result = Spree::Current.set(store: store) do
-          described_class.call(cart: ready_cart.reload)
+          expect(result).to be_failure
+          expect(result.error.value[:code]).to eq('validation_failed')
+          expect(result.error.value[:errors]).to include(
+            a_hash_including(field: 'phone', code: 'phone_invalid', address_type: 'shipping')
+          )
+          expect(Spree::Order.where(cart_id: ready_cart.id)).to be_empty
         end
 
-        expect(result).to be_failure
-        expect(result.error.value[:code]).to eq('validation_failed')
-        expect(result.error.value[:errors]).to include(
-          a_hash_including(field: 'phone', code: 'phone_required')
-        )
-        expect(Spree::Order.where(cart_id: ready_cart.id)).to be_empty
+        it 'enforces a required phone on a quick-checkout address before payment' do
+          ready_cart.ship_address.update_columns(phone: nil, quick_checkout: true)
+          ready_cart.bill_address.update_column(:phone, '2025550123')
+          store.update!(preferred_address_requires_phone: true)
+
+          result = Spree::Current.set(store: store) do
+            described_class.call(cart: ready_cart.reload)
+          end
+
+          expect(result).to be_failure
+          expect(result.error.value[:code]).to eq('validation_failed')
+          expect(result.error.value[:errors]).to include(
+            a_hash_including(field: 'phone', code: 'phone_required')
+          )
+          expect(Spree::Order.where(cart_id: ready_cart.id)).to be_empty
+        end
       end
 
       it 'rejects a variant discontinued after it entered the cart' do
