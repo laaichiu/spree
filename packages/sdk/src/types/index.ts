@@ -92,14 +92,7 @@ export type {
 export type * from './params'
 
 // Checkout requirement — a single unsatisfied checkout prerequisite
-export interface CheckoutRequirement {
-  /** Checkout step this requirement belongs to (e.g. "address", "payment") */
-  step: string
-  /** Field that needs to be satisfied (e.g. "email", "shipping_address") */
-  field: string
-  /** Human-readable message describing what's needed */
-  message: string
-}
+export type CheckoutRequirement = CartType['requirements'][number]
 
 // Cart warning type — convenience alias for the inline type from the generated Cart
 export type CartWarning = CartType['warnings'][number]

@@ -59,7 +59,7 @@ export const CartSchema = z.object({
   display_adjustment_total: z.string().nullable(),
   current_step: z.string(),
   completed_steps: z.array(z.string()),
-  requirements: z.array(z.object({ step: z.string(), field: z.string(), code: z.string(), message: z.string() })),
+  requirements: z.array(z.object({ step: z.string(), field: z.string(), code: z.string(), message: z.string(), address_type: z.string().optional() })),
   order_minimum: z.string().nullable(),
   order_minimum_shortfall: z.string().nullable(),
   below_order_minimum: z.boolean().nullable(),

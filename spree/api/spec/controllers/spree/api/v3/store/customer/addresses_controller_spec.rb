@@ -121,7 +121,7 @@ RSpec.describe Spree::Api::V3::Store::Customer::AddressesController, type: :cont
 
     it 'rejects an invalid nonblank phone even when phone is optional' do
       store.update!(preferred_address_validates_phone: true)
-      post :create, params: address_params.merge(phone: '1234567890')
+      post :create, params: address_params.merge(phone: '123')
 
       expect(response).to have_http_status(:unprocessable_content)
       expect(json_response.dig('error', 'details', 'phone')).to be_present

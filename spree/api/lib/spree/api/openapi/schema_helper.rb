@@ -137,9 +137,13 @@ module Spree
               properties: {
                 step: { type: :string, description: 'Checkout step this requirement belongs to', example: 'payment' },
                 field: { type: :string, description: 'Field that needs to be satisfied', example: 'payment' },
+                code: { type: :string, description: 'Machine-readable requirement code', example: 'phone_invalid' },
+                address_type: {
+                  type: :string, description: 'Shipping or billing address when the requirement is for a phone', enum: %w[shipping billing]
+                },
                 message: { type: :string, description: 'Human-readable requirement message', example: 'Add a payment method' }
               },
-              required: %w[step field message]
+              required: %w[step field code message]
             },
             CartWarning: {
               type: :object,

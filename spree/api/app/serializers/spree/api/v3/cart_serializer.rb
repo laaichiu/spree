@@ -14,7 +14,7 @@ module Spree
                  po_document_byte_size: ['number | null'], order_minimum: [:string, nullable: true],
                  order_minimum_shortfall: [:string, nullable: true], below_order_minimum: ['boolean | null'],
                  freight_summary: [:FreightSummary, nullable: true],
-                 requirements: 'Array<{step: string, field: string, code: string, message: string}>',
+                 requirements: "Array<{step: string, field: string, code: string, message: string, address_type?: 'shipping' | 'billing'}>",
                  shipping_eq_billing_address: :boolean,
                  warnings: 'Array<{code: string, message: string, line_item_id?: string, variant_id?: string, item_index?: number}>',
                  billing_address: { nullable: true }, shipping_address: { nullable: true },

@@ -59649,6 +59649,16 @@ components:
           type: string
           description: Field that needs to be satisfied
           example: payment
+        code:
+          type: string
+          description: Machine-readable requirement code
+          example: phone_invalid
+        address_type:
+          type: string
+          description: Shipping or billing address when the requirement is for a phone
+          enum:
+          - shipping
+          - billing
         message:
           type: string
           description: Human-readable requirement message
@@ -59656,6 +59666,7 @@ components:
       required:
       - step
       - field
+      - code
       - message
     CartWarning:
       type: object

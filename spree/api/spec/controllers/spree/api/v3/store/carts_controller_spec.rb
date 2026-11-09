@@ -329,6 +329,29 @@ RSpec.describe Spree::Api::V3::Store::CartsController, type: :controller do
   end
 
   describe 'GET #show' do
+    context 'with invalid shipping and billing phone numbers' do
+      let(:store) { create(:store) }
+      let(:cart) { create(:cart_with_line_items, store: store) }
+
+      before do
+        shipping = Spree::Current.set(store: store) { create(:address, phone: '1234567890') }
+        billing = Spree::Current.set(store: store) { create(:address, phone: '1234567890') }
+        cart.update_columns(ship_address_id: shipping.id, bill_address_id: billing.id)
+        store.update!(preferred_address_validates_phone: true)
+        request.headers['x-spree-token'] = cart.token
+      end
+
+      it 'identifies the address for each phone requirement' do
+        get :show, params: { id: cart.prefixed_id }
+
+        phone_requirements = json_response['requirements'].select { |requirement| requirement['field'] == 'phone' }
+        expect(phone_requirements).to contain_exactly(
+          a_hash_including('code' => 'phone_invalid', 'address_type' => 'shipping'),
+          a_hash_including('code' => 'phone_invalid', 'address_type' => 'billing')
+        )
+      end
+    end
+
     context 'with x-spree-token header' do
       let(:cart) { create(:cart_with_line_items, store: store) }
 
