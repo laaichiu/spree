@@ -69,5 +69,15 @@ RSpec.describe Spree::Api::V3::Store::StoreController, type: :controller do
       expect(json_response['address_requires_phone']).to be(true)
       expect(json_response['address_validates_phone']).to be(true)
     end
+
+    it 'preserves format validation for existing stores that required phone numbers before the preference existed' do
+      store.update!(preferred_address_requires_phone: true)
+      store.update_columns(preferences: store.preferences.except('address_validates_phone'))
+      store.reload
+
+      get :show
+
+      expect(json_response['address_validates_phone']).to be(true)
+    end
   end
 end
