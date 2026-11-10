@@ -190,6 +190,22 @@ RSpec.describe Spree::Checkout::Requirements do
       end
     end
 
+    context 'when phone is required but format validation is disabled' do
+      before do
+        Spree::Current.set(store: store) do
+          store.update!(preferred_address_requires_phone: false, preferred_address_validates_phone: false)
+          address
+          order
+          store.update!(preferred_address_requires_phone: true)
+        end
+      end
+
+      it 'allows a supplied number without a phone-format requirement' do
+        expect(requirements).not_to include(a_hash_including(field: 'phone'))
+        expect(completion_requirements).not_to include(a_hash_including(field: 'phone'))
+      end
+    end
+
     context 'when an explicit international phone is valid for a different country' do
       let(:phone) { '+48 58 753 02 27' }
 

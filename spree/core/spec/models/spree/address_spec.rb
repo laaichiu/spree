@@ -187,12 +187,21 @@ describe Spree::Address, type: :model do
     end
 
     context 'when phone is required' do
-      before { stub_store_preferences(address_requires_phone: true) }
+      before do
+        stub_store_preferences(address_requires_phone: true, address_validates_phone: false)
+      end
 
       it 'validates presence of the phone' do
         address.phone = ''
         address.valid?
         expect(address.errors['phone']).to eq(["can't be blank"])
+      end
+
+      it 'does not validate the format when only phone presence is required' do
+        address.state_code = 'NY'
+        address.phone = '1234567890'
+
+        expect(address).to be_valid
       end
     end
 

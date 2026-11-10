@@ -428,7 +428,7 @@ module Spree
     end
 
     def validates_phone?
-      store_requires_phone? || store_preference(:address_validates_phone, false)
+      store_preference(:address_validates_phone, false)
     end
 
     def phone_valid?

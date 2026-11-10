@@ -10,7 +10,7 @@ describe Spree::Addresses::PhoneValidator do
     end
   end
 
-  before { stub_store_preferences(address_requires_phone: true, address_validates_phone: false) }
+  before { stub_store_preferences(address_requires_phone: false, address_validates_phone: true) }
 
   describe '#validate' do
     context 'when no phone is provided' do
@@ -51,7 +51,7 @@ describe Spree::Addresses::PhoneValidator do
       end
     end
 
-    context 'when phone is required but a quick-checkout address contains an invalid number' do
+    context 'when phone is required but phone validation is disabled' do
       let(:address) { build_stubbed(:address, phone: '1234567890', quick_checkout: true) }
 
       before do
@@ -59,9 +59,9 @@ describe Spree::Addresses::PhoneValidator do
         allow(address).to receive(:store_preference).with(:address_validates_phone, false).and_return(false)
       end
 
-      it 'validates the supplied number while deferring presence' do
+      it 'does not validate the supplied number' do
         subject.validate(address)
-        expect(address.errors[:phone]).to include('is invalid')
+        expect(address.errors[:phone]).to be_empty
       end
     end
 
