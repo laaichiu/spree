@@ -65,8 +65,8 @@ dashboard under **Settings → Store**, or through the Admin API:
 
 | Preference | Effect |
 |---|---|
-| `address_requires_phone` | Requires a phone number on addresses |
-| `address_validates_phone` | Validates a supplied number even when the phone field is optional |
+| `address_requires_phone` | Requires a nonblank phone number on addresses; does not enable format validation |
+| `address_validates_phone` | Validates every nonblank phone number, whether the field is required or optional |
 | `company_field_enabled` | Shows the company field on address forms |
 | `address_requires_company` | Requires it — only meaningful with the field shown |
 | `disable_sku_validation` | Turns off SKU uniqueness |
@@ -94,12 +94,15 @@ curl -X PATCH 'https://api.mystore.com/api/v3/admin/store' \
   is API-only for now.
 </Note>
 
-`address_validates_phone` defaults to `false`, preserving existing stores' optional
-phone behavior. Requiring a phone also validates it, regardless of this setting.
-With validation enabled, a national number is interpreted using the address
-country. An explicitly international number may belong to a different country.
-New or updated valid numbers are stored in E.164 format; numbers with extensions
-are rejected. Existing saved numbers are not backfilled when the policy changes.
+`address_validates_phone` defaults to `false`, preserving existing stores'
+phone-format behavior. The two settings are independent: `address_requires_phone`
+controls whether a number may be blank, while `address_validates_phone` controls
+whether a nonblank number must match a numbering plan. If a number is required
+but format validation is off, Spree checks only for its presence. With validation
+enabled, a national number is interpreted using the address country. An
+explicitly international number may belong to a different country. New or
+updated valid numbers are stored in E.164 format; numbers with extensions are
+rejected. Existing saved numbers are not backfilled when the policy changes.
 Validation checks whether a number is plausible, not whether the buyer owns or
 can receive calls at it.
 

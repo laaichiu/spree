@@ -2118,7 +2118,7 @@
       },
       "store": {
         "address_requires_phone": {
-          "help": "Hacer obligatorio un número de teléfono en las direcciones de los clientes.",
+          "help": "Exige un número de teléfono en las direcciones de los clientes. Solo comprueba que se haya indicado; la validación del formato se activa por separado.",
           "label": "Exigir número de teléfono"
         },
         "address_validates_phone": {

@@ -2121,7 +2121,7 @@
       },
       "store": {
         "address_requires_phone": {
-          "help": "Bắt buộc phải ghi số điện thoại trên địa chỉ của khách hàng.",
+          "help": "Bắt buộc nhập số điện thoại trong địa chỉ khách hàng. Thiết lập này chỉ kiểm tra việc có nhập hay không; cần bật riêng kiểm tra định dạng.",
           "label": "Yêu cầu số điện thoại"
         },
         "address_validates_phone": {

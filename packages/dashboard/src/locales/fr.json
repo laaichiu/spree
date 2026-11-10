@@ -2121,7 +2121,7 @@
       },
       "store": {
         "address_requires_phone": {
-          "help": "Rendre le numéro de téléphone obligatoire dans les adresses des clients.",
+          "help": "Rend obligatoire un numéro de téléphone dans les adresses des clients. Ce réglage vérifie uniquement sa présence ; la validation du format s'active séparément.",
           "label": "Numéro de téléphone obligatoire"
         },
         "address_validates_phone": {

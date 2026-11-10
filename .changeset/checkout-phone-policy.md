@@ -4,4 +4,4 @@
 "@spree/dashboard": patch
 ---
 
-Expose checkout address phone requirements and optional number validation to storefronts and store settings. Valid numbers are saved in E.164 format, and checkout rechecks saved addresses against the current store policy.
+Expose independent phone-presence and phone-format settings through store settings and the Store API. When format validation is enabled, valid numbers are saved in E.164 format, and checkout rechecks saved addresses against the current store policy.

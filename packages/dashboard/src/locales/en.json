@@ -2121,7 +2121,7 @@
       },
       "store": {
         "address_requires_phone": {
-          "help": "Make a phone number mandatory on customer addresses.",
+          "help": "Require a phone number on customer addresses. This checks presence only; turn on phone validation separately to check its format.",
           "label": "Require phone number"
         },
         "address_validates_phone": {

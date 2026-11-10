@@ -2139,7 +2139,7 @@
       },
       "store": {
         "address_requires_phone": {
-          "help": "Uczyń numer telefonu obowiązkowym w adresach klientów.",
+          "help": "Wymaga podania numeru telefonu w adresach klientów. To ustawienie sprawdza tylko jego obecność; sprawdzanie formatu włącza się osobno.",
           "label": "Wymagaj numeru telefonu"
         },
         "address_validates_phone": {

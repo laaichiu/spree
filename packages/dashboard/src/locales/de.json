@@ -2121,7 +2121,7 @@
       },
       "store": {
         "address_requires_phone": {
-          "help": "Eine Telefonnummer in Kundenadressen zur Pflicht machen.",
+          "help": "Eine Telefonnummer in Kundenadressen ist erforderlich. Diese Einstellung prüft nur, ob sie angegeben wurde; die Formatprüfung muss separat aktiviert werden.",
           "label": "Telefonnummer erforderlich"
         },
         "address_validates_phone": {

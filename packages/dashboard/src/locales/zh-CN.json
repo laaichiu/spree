@@ -2116,7 +2116,7 @@
       },
       "store": {
         "address_requires_phone": {
-          "help": "将电话号码设为客户地址的必填项。",
+          "help": "要求客户地址填写电话号码。此设置只检查是否填写；号码格式需单独开启校验。",
           "label": "要求填写电话号码"
         },
         "address_validates_phone": {
