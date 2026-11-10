@@ -55,6 +55,8 @@ What customers are asked for when entering an address. Every extra field is one 
 - **Require phone number** - Make a phone number mandatory on customer addresses. This controls presence only; it does not turn on format validation. Some carriers need a number for delivery.
 - **Validate phone numbers** - Check every supplied phone number against its country's numbering plan, whether the field is required or optional. This does not make the field required. When validation is off, Spree checks only whether a required phone number is present.
 
+For new stores, phone format validation is off by default. When upgrading, a store that already required phone numbers keeps its previous format-validation behavior unless it has already chosen a value for **Validate phone numbers**. The settings can then be changed independently.
+
 ## Order Numbers
 
 How orders and other numbered documents are referenced. These are the numbers your team quotes on the phone and customers quote back in emails, so readability matters more than you might think.
