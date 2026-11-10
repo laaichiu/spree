@@ -5,6 +5,27 @@ describe Spree::Store, type: :model, without_global_store: true do
     Spree::Country.by_iso('US')
   end
 
+  describe 'address phone preferences' do
+    it 'defaults phone format validation off for new stores' do
+      store = build(:store, preferred_address_requires_phone: true)
+
+      expect(store.preferred_address_validates_phone).to be(false)
+    end
+
+    it 'preserves phone format validation for existing stores that required a phone before the preference existed' do
+      store = create(:store, preferred_address_requires_phone: true)
+      store.update_columns(preferences: store.preferences.except('address_validates_phone'))
+
+      expect(store.reload.preferred_address_validates_phone).to be(true)
+    end
+
+    it 'keeps an explicit validation preference independent from phone requiredness' do
+      store = create(:store, preferred_address_requires_phone: true, preferred_address_validates_phone: false)
+
+      expect(store.reload.preferred_address_validates_phone).to be(false)
+    end
+  end
+
   describe 'order number sequence start' do
     let(:store) { create(:store) }
 

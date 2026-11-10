@@ -179,7 +179,9 @@ module Spree
     # B2B store collects it from everyone, a mixed store only offers it.
     preference :address_requires_company, :boolean, default: false
     preference :address_requires_phone, :boolean, default: false
-    preference :address_validates_phone, :boolean, default: false
+    # Keep the old required-phone format validation for existing stores that
+    # have not chosen a value for this new, independent preference.
+    preference :address_validates_phone, :boolean, default: -> { persisted? && preferred_address_requires_phone }
     MEDIA_TYPE_FORMAT = %r{\A[a-z0-9][a-z0-9!#$&^_.+-]*/[a-z0-9][a-z0-9!#$&^_.+*-]*\z}i
 
     # digital assets preferences
